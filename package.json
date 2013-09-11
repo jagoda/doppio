@@ -1,0 +1,33 @@
+{
+  "name": "doppio",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jagoda/doppio",
+  "author": {
+    "name": "Jeff Jagoda",
+    "email": "jeffrey.jagoda@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jjagoda/doppio.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jagoda/doppio/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/server",
+  "scripts": {
+    "test": "grunt"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "async": "~0.2.9",
+    "grunt-contrib-jshint": "~0.6.4",
+    "chai": "~1.7.2",
+    "jshint": "~2.1.10",
+    "mocha": "~1.12.1",
+    "grunt-cli": "~0.1.9",
+    "istanbul": "~0.1.43"
+  }
+}
