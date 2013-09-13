@@ -48,12 +48,12 @@ requests automatically. The following configuration options are available:
  + **port** - _Optional_. The port that the server should listen on. If this
     is not provided, the default port is used (this is typically an arbitrary
     open port).
- + **callback** _Optional_. If provided, the callback will be called once the
-    server is ready to accept requests. If an error occurs, it will be passed
+ + **callback** _Optional_. If provided, the callback will be automatically
+    subscribed to the `ready` event. If an error occurs, it will be passed
     as the first argument to the callback.
 
 Starts listening on a port. It is an error to try to start a server that is
-already listening.
+already listening. Returns a chainable reference to the server.
 
 ### server.stop([callback])
 
@@ -67,6 +67,12 @@ Stops listening for requests.
 
 Returns the fully qualified URL of the application. An error will be thrown if
 `server.url()` is called while the server is not listening.
+
+### Event: 'ready'
+
+    function () { }
+
+Emitted when the server is ready to process requests.
 
 [1]: http://nodejs.org/api/http.html#http_http_createserver_requestlistener "Node.JS HTTP Server"
 [2]: http://expressjs.com/api.html#app.listen "Express app.listen()"

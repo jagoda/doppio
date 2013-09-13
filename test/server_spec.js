@@ -60,6 +60,7 @@ describe("A server", function () {
     
     afterEach(function (done) {
         try {
+            testServer.removeAllListeners();
             testServer.stop(function () {
                 // Ignore errors reported by the 'stop' method.
                 return done();
@@ -123,9 +124,7 @@ describe("A server", function () {
             [
                 // Bind to arbitrary port in the background.
                 function (next) {
-                    testServer.start();
-                    // Need to wait to make sure the server has started.
-                    setTimeout(next, wait);
+                    testServer.start().once("ready", next);
                 },
                 function (next) {
                     get(testServer.url(), next);
@@ -136,8 +135,7 @@ describe("A server", function () {
                 },
                 // Bind to specific port in the background.
                 function (next) {
-                    testServer.start(12345);
-                    setTimeout(next, wait);
+                    testServer.start(12345).once("ready", next);
                 },
                 function (next) {
                     var url = testServer.url();
@@ -322,7 +320,7 @@ describe("A server", function () {
                     expect(error).to.be.ok;
                     process.env.NODE_ENV = "production";
                     testServer           = server({ port: 12345 }, testHandler);
-                    setTimeout(next, wait);
+                    testServer.once("ready", next);
                 },
                 function (next) {
                     get(url, next);
