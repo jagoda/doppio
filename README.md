@@ -1,7 +1,7 @@
 doppio
 ======
 
-Doppio is a small "server container" for Node.JS web applications that make
+Doppio is a small "server container" for Node.JS web applications that makes
 managing the server process more convenient and testable.
 
 ## Basic Usage
@@ -11,8 +11,8 @@ managing the server process more convenient and testable.
 Doppio works by wrapping your application with an [http server][1]. This is
 basically what the [Express documentation][2] recommends for configuring an
 application with HTTPS. Doppio just makes this process easier to manage and
-test. In the simplest case this is easy, simply wrap your app and the server
-will start automatically:
+test. In the simplest case you can wrap your app and the server will start
+automatically:
 
     var doppio = require("doppio");
     
