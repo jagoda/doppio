@@ -170,6 +170,26 @@ describe("A server", function () {
         );
     });
     
+    it("can override the default port to pick an open port", function (done) {
+        testServer = server({ port: 8080 }, testHandler);
+        
+        async.waterfall(
+            [
+                function (next) {
+                    testServer.start(0, next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).not.to.equal("http://localhost:8080");
+                    expect(url).to.match(/^http:\/\/localhost:/);
+                    get(url, next);
+                }
+            ],
+            done
+        );
+    });
+    
     it("can be configured with a default port", function (done) {
         testServer = server({ port: 12345 }, testHandler);
         
