@@ -58,10 +58,19 @@ describe("A server", function () {
         wait = 500,
         testServer;
     
+    beforeEach(function () {
+        testServer = null;
+    });
+    
     afterEach(function (done) {
         try {
             testServer.removeAllListeners();
-            testServer.stop().once("stopped", done);
+            testServer.stop()
+                .once("stopped", done)
+                .once("error", function () {
+                    // Ignore errors calling the 'stop' method.
+                    return done();
+                });
         } catch (error) {
             // Ignore errors calling the 'stop' method.
             return done();
@@ -391,6 +400,7 @@ describe("A server", function () {
             return next();
         }
         
+        testServer = server();
         async.waterfall(
             [
                 function (next) {
@@ -410,6 +420,15 @@ describe("A server", function () {
             ],
             done
         );
+    });
+    
+    it("emits an 'error' event if problems occur", function (done) {
+        testServer = server();
+        
+        testServer.stop().on("error", function (error) {
+            expect(error).to.be.an.instanceOf(Error);
+            return done();
+        });
     });
     
 });

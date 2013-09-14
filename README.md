@@ -49,8 +49,7 @@ requests automatically. The following configuration options are available:
     is not provided, the default port is used (this is typically an arbitrary
     open port).
  + **callback** _Optional_. If provided, the callback will be automatically
-    subscribed to the `ready` event. If an error occurs, it will be passed
-    as the first argument to the callback.
+    subscribed to the `ready` and `error` events.
 
 Starts listening on a port. It is an error to try to start a server that is
 already listening. Returns a chainable reference to the server.
@@ -58,8 +57,7 @@ already listening. Returns a chainable reference to the server.
 ### server.stop([callback])
 
  + **callback** _Optional_. If provided, the callback will be automatically
-    subscribed to the `stopped` event. If an error occurs, it will be passed as
-    the first argument to the callback.
+    subscribed to the `stopped` and `error` events.
 
 Stops listening for requests. Returns a chainable reference to the server.
 
@@ -67,6 +65,12 @@ Stops listening for requests. Returns a chainable reference to the server.
 
 Returns the fully qualified URL of the application. An error will be thrown if
 `server.url()` is called while the server is not listening.
+
+### Event: 'error'
+
+    function (error) { }
+
+Emitted when an error occurs with the server.
 
 ### Event: 'ready'
 
