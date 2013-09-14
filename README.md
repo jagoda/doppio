@@ -57,11 +57,11 @@ already listening. Returns a chainable reference to the server.
 
 ### server.stop([callback])
 
- + **callback** _Optional_. If provided, the callback will be called once the
-    server has stopped listening for requests. If an error occurs, it will be
-    passed as the first argument to the callback.
+ + **callback** _Optional_. If provided, the callback will be automatically
+    subscribed to the `stopped` event. If an error occurs, it will be passed as
+    the first argument to the callback.
 
-Stops listening for requests.
+Stops listening for requests. Returns a chainable reference to the server.
 
 ### server.url()
 
@@ -73,6 +73,12 @@ Returns the fully qualified URL of the application. An error will be thrown if
     function () { }
 
 Emitted when the server is ready to process requests.
+
+### Event: 'stopped'
+
+    function () { }
+
+Emitted when the server closes and finishes handling all requests.
 
 [1]: http://nodejs.org/api/http.html#http_http_createserver_requestlistener "Node.JS HTTP Server"
 [2]: http://expressjs.com/api.html#app.listen "Express app.listen()"

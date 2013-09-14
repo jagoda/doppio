@@ -61,10 +61,7 @@ describe("A server", function () {
     afterEach(function (done) {
         try {
             testServer.removeAllListeners();
-            testServer.stop(function () {
-                // Ignore errors reported by the 'stop' method.
-                return done();
-            });
+            testServer.stop().once("stopped", done);
         } catch (error) {
             // Ignore errors calling the 'stop' method.
             return done();
@@ -130,8 +127,7 @@ describe("A server", function () {
                     get(testServer.url(), next);
                 },
                 function (next) {
-                    testServer.stop();
-                    setTimeout(next, wait);
+                    testServer.stop().once("stopped", next);
                 },
                 // Bind to specific port in the background.
                 function (next) {
