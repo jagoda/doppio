@@ -422,13 +422,44 @@ describe("A server", function () {
         );
     });
     
-    it("emits an 'error' event if problems occur", function (done) {
+    it("emits an 'error' event if API problems occur", function (done) {
         testServer = server();
         
         testServer.stop().on("error", function (error) {
             expect(error).to.be.an.instanceOf(Error);
             return done();
         });
+    });
+    
+    it("emits an 'error' event if server errors occur", function (done) {
+        var port = 12345;
+        
+        var server1 = server(),
+            server2 = server();
+        
+        async.waterfall(
+            [
+                function (next) {
+                    server1.start(port).on("ready", next);
+                },
+                function (next) {
+                    // Error occurs because two servers try to bind to the same
+                    // port.
+                    server2.once("error", forwardError(next));
+                    server2.start(port);
+                    // Should stop the first server no matter what. Second
+                    // server should never be listening since the port is
+                    // already in use.
+                    server1.stop();
+                },
+                function (error, next) {
+                    expect(error).to.be.an.instanceOf(Error);
+                    expect(error.message).to.contain("EADDRINUSE");
+                    return next();
+                }
+            ],
+            done
+        );
     });
     
 });
