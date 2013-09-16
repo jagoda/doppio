@@ -61,7 +61,10 @@ already listening. Returns a chainable reference to the server.
 
 Stops listening for requests. Returns a chainable reference to the server.
 
-### server.url()
+### server.url([path])
+
+ + **path** _Optional_. Resolve the given path against the server base URL and
+    return the fully qualified URL.
 
 Returns the fully qualified URL of the application. An error will be thrown if
 `server.url()` is called while the server is not listening.

@@ -55,7 +55,8 @@ describe("A server", function () {
         testKey = fs.readFileSync(
             path.join(__dirname, "data", "test.key")
         ),
-        wait = 500,
+        urlPattern = /http:\/\/localhost:\d{1,5}\//,
+        wait       = 500,
         testServer;
     
     beforeEach(function () {
@@ -83,10 +84,30 @@ describe("A server", function () {
         async.waterfall(
             [
                 function (next) {
-                    testServer.start(12345, next);
+                    testServer.start(next);
                 },
                 function (next) {
-                    expect(testServer.url()).to.equal("http://localhost:12345");
+                    expect(testServer.url()).to.match(urlPattern);
+                    return next();
+                }
+            ],
+            done
+        );
+    });
+    
+    it("can resolve a URL relative to the server base", function (done) {
+        var pattern = /http:\/\/localhost:\d{1,5}\/some\/path/;
+        
+        testServer = server();
+        async.waterfall(
+            [
+                function (next) {
+                    testServer.start(next);
+                },
+                function (next) {
+                    expect(testServer.url("/some/path")).to.match(pattern);
+                    expect(testServer.url("some/path")).to.match(pattern);
+                    expect(testServer.url("../some/path")).to.match(pattern);
                     return next();
                 }
             ],
@@ -145,7 +166,7 @@ describe("A server", function () {
                 function (next) {
                     var url = testServer.url();
                     
-                    expect(url).to.equal("http://localhost:12345");
+                    expect(url).to.equal("http://localhost:12345/");
                     get(url, next);
                 }
             ],
@@ -164,8 +185,8 @@ describe("A server", function () {
                 function (next) {
                     var url = testServer.url();
                     
-                    expect(url).to.match(/^http:\/\/localhost/);
-                    expect(url).to.not.equal("http://localhost:12345");
+                    expect(url).to.match(urlPattern);
+                    expect(url).to.not.equal("http://localhost:12345/");
                     get(url, next);
                 }
             ],
@@ -184,8 +205,8 @@ describe("A server", function () {
                 function (next) {
                     var url = testServer.url();
                     
-                    expect(url).not.to.equal("http://localhost:8080");
-                    expect(url).to.match(/^http:\/\/localhost:/);
+                    expect(url).not.to.equal("http://localhost:8080/");
+                    expect(url).to.match(urlPattern);
                     get(url, next);
                 }
             ],
@@ -204,7 +225,7 @@ describe("A server", function () {
                 function (next) {
                     var url = testServer.url();
                     
-                    expect(url).to.equal("http://localhost:12345");
+                    expect(url).to.equal("http://localhost:12345/");
                     get(url, next);
                 },
                 function (next) {
@@ -216,7 +237,7 @@ describe("A server", function () {
                 function (next) {
                     var url = testServer.url();
                     
-                    expect(url).to.equal("http://localhost:54321");
+                    expect(url).to.equal("http://localhost:54321/");
                     get(url, next);
                 }
             ],
@@ -230,10 +251,12 @@ describe("A server", function () {
         async.waterfall(
             [
                 function (next) {
-                    testServer.start(12345, next);
+                    testServer.start(next);
                 },
                 function (next) {
-                    expect(testServer.url()).to.equal("http://foo:12345");
+                    expect(testServer.url()).to.match(
+                        /http:\/\/foo:\d{1,5}\//
+                    );
                     return next();
                 }
             ],
