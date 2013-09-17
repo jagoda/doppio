@@ -485,4 +485,88 @@ describe("A server", function () {
         );
     });
     
+    describe("plugin", function () {
+        
+        var server    = require(".."),
+            serverUrl = "https://foo:12345/";
+        
+        afterEach(function () {
+            server.unloadPlugins();
+        });
+        
+        it("can set the default options", function (done) {
+            var nodeEnv = process.env.NODE_ENV;
+            
+            server.loadPlugin("../test/data/test-plugin");
+            async.waterfall(
+                [
+                    function (next) {
+                        process.env.NODE_ENV = "production";
+                        testServer = server();
+                        // Wait to see if server will autostart.
+                        setTimeout(next, wait);
+                    },
+                    function (next) {
+                        // If server autostarted this will errback.
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal(serverUrl);
+                        testServer.stop(next);
+                    },
+                    // Test a second time in order to have more confidence that
+                    // we didn't just get lucky with the port.
+                    function (next) {
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal(serverUrl);
+                        return next();
+                    }
+                ],
+                function (error) {
+                    // Need to always reset the node environment.
+                    process.env.NODE_ENV = nodeEnv;
+                    return done(error);
+                }
+            );
+        });
+        
+        it("can override user-supplied configuration options", function (done) {
+            server.loadPlugin("../test/data/test-plugin");
+            async.waterfall(
+                [
+                    function (next) {
+                        testServer = server({ port: 54321 });
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal(serverUrl);
+                        return next();
+                    }
+                ],
+                done
+            );
+        });
+        
+        it("can be chained with other plugins", function (done) {
+            server.loadPlugin("../test/data/increment-port-plugin");
+            server.loadPlugin("../test/data/test-plugin");
+            async.waterfall(
+                [
+                    function (next) {
+                        testServer = server();
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal("https://foo:12346/");
+                        return next();
+                    }
+                ],
+                done
+            );
+        });
+        
+    });
+    
 });
