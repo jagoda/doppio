@@ -48,8 +48,8 @@ requests automatically. The following configuration options are available:
  + **id** - The module ID of the plugin to load (a Node.JS module).
 
 Loads a module to process server configuration options. When multiple plugins
-are loaded, plugins loaded later are processed before earlier loaded modules.
-See the "Plugins" section for more details.
+are loaded, they will be processed in the order loaded. See the "Plugins"
+section for more details.
 
 ### doppio.unloadPlugins()
 
@@ -106,10 +106,9 @@ useful for things like adding runtime specific logic. A Doppio plugin is just a
 Node module that exports a function that takes an options hash as its only
 argument and returns a new options hash (see the `doppio()` section for more
 info on the available options). Each time a new server instance is created, the
-plugins are invoked in the reverse order they were loaded in. Each plugin is
-passed the options returned from the previous plugin as its argument. For
-example, the default plugin (that is always processed as the last plugin) is
-equivalent to the following:
+plugins are invoked in the order they were loaded in. Each plugin is passed the
+options returned from the previous plugin as its argument. For example, the
+default option logic is equivalent to the following plugin code:
 
     module.exports = function (options) {
         options           = options || {};

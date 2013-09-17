@@ -550,8 +550,8 @@ describe("A server", function () {
         });
         
         it("can be chained with other plugins", function (done) {
-            server.loadPlugin("../test/data/increment-port-plugin");
             server.loadPlugin("../test/data/test-plugin");
+            server.loadPlugin("../test/data/increment-port-plugin");
             async.waterfall(
                 [
                     function (next) {
