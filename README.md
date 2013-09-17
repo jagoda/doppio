@@ -43,12 +43,13 @@ requests automatically. The following configuration options are available:
  + **scheme** - _Defaults to 'http'_. Must be either 'http' or 'https'. When
     running with 'https', a certifacate and key must also be specified.
 
-### doppio.loadPlugin(id)
+### doppio.loadPlugin([id...])
 
- + **id** - The module ID of the plugin to load (a Node.JS module).
+ + **id** - _Optional_. One ore more module IDs of the plugins to load (Node.JS
+    modules).
 
-Loads a module to process server configuration options. When multiple plugins
-are loaded, they will be processed in the order loaded. See the "Plugins"
+Loads plugins to process server configuration options. When multiple plugins
+are loaded, they will be processed in the order specified. See the "Plugins"
 section for more details.
 
 ### doppio.unloadPlugins()

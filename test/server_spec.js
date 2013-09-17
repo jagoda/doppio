@@ -567,6 +567,26 @@ describe("A server", function () {
             );
         });
         
+        it("can be loaded simultaneously with other plugins", function (done) {
+            server.loadPlugin(
+                "../test/data/test-plugin",
+                "../test/data/increment-port-plugin"
+            );
+            async.waterfall(
+                [
+                    function (next) {
+                        testServer = server();
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal("https://foo:12346/");
+                        return next();
+                    }
+                ],
+                done
+            );
+        });
+        
     });
     
 });
