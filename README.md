@@ -47,9 +47,9 @@ requests automatically. The following configuration options are available:
 
  + **id** - The module ID of the plugin to load (a Node.JS module).
 
-Loads a module to process server configuration. When multiple plugins are
-loaded, plugins loaded later are processed before earlier loaded modules. See
-the "Plugins" section for more details.
+Loads a module to process server configuration options. When multiple plugins
+are loaded, plugins loaded later are processed before earlier loaded modules.
+See the "Plugins" section for more details.
 
 ### doppio.unloadPlugins()
 
@@ -117,7 +117,7 @@ equivalent to the following:
         options.port      = "port" in options ? options.port : 0;
         options.scheme    = options.scheme || "http";
         return options;
-    }
+    };
 
 [1]: http://nodejs.org/api/http.html#http_http_createserver_requestlistener "Node.JS HTTP Server"
 [2]: http://expressjs.com/api.html#app.listen "Express app.listen()"
