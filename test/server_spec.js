@@ -487,8 +487,7 @@ describe("A server", function () {
     
     describe("plugin", function () {
         
-        var server    = require(".."),
-            serverUrl = "https://foo:12345/";
+        var serverUrl = "https://foo:12345/";
         
         afterEach(function () {
             server.unloadPlugins();
