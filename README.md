@@ -70,7 +70,7 @@ already listening. Returns a chainable reference to the server.
 ### server.stop([callback])
 
  + **callback** _Optional_. If provided, the callback will be automatically
-    subscribed to the `stopped` and `error` events.
+    subscribed to the `close` and `error` events.
 
 Stops listening for requests. Returns a chainable reference to the server.
 
@@ -94,7 +94,7 @@ Emitted when an error occurs with the server.
 
 Emitted when the server is ready to process requests.
 
-### Event: 'stopped'
+### Event: 'close'
 
     function () { }
 
