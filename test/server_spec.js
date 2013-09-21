@@ -245,6 +245,60 @@ describe("A server", function () {
         );
     });
     
+    it("can publish a different port that what it listens on", function (done) {
+        testServer = server(
+            {
+                port : {
+                    private : 12345,
+                    public  : 54321
+                }
+            },
+            testHandler
+        );
+        
+        async.waterfall(
+            [
+                function (next) {
+                    testServer.start(next);
+                },
+                function (next) {
+                    expect(testServer.url()).to.equal(
+                        "http://localhost:54321/"
+                    );
+                    get("http://localhost:12345/", next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    testServer.start(
+                        { private: 54321, public: 12345 },
+                        next
+                    );
+                },
+                function (next) {
+                    expect(testServer.url()).to.equal(
+                        "http://localhost:12345/"
+                    );
+                    get("http://localhost:54321/", next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    testServer.start(12345, next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.equal("http://localhost:12345/");
+                    get(url, next);
+                }
+            ],
+            done
+        );
+    });
+    
     it("can use a customized hostname", function (done) {
         testServer = server({ hostname: "foo" }, testHandler);
         

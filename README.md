@@ -39,7 +39,8 @@ requests automatically. The following configuration options are available:
     will be running at. This is used by `server.url()`.
  + **port** - _Defaults to 0_. The default port to use if a port is not provided
     to `server.start()`. If 0 is provided, an arbitrary open port will be
-    assigned.
+    assigned. For cases involving a proxy, a port pair can be specified (see
+    `server.start()` for more details).
  + **scheme** - _Defaults to 'http'_. Must be either 'http' or 'https'. When
     running with 'https', a certifacate and key must also be specified.
 
@@ -65,7 +66,12 @@ integrating with external tools like [Socket.IO][4].
 
  + **port** - _Optional_. The port that the server should listen on. If this
     is not provided, the default port is used (this is typically an arbitrary
-    open port).
+    open port). In the case that the server should bind to a different port
+    than the client will connect on, a pair can be specified as follows:
+        {
+            private : <port to bind to>,
+            public  : <port to publish via `server.url()`>
+        }
  + **callback** _Optional_. If provided, the callback will be automatically
     subscribed to the `ready` and `error` events.
 
