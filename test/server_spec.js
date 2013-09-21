@@ -497,7 +497,7 @@ describe("A server", function () {
         it("can set the default options", function (done) {
             var nodeEnv = process.env.NODE_ENV;
             
-            server.loadPlugin("../test/data/test-plugin");
+            server.loadPlugin("./data/test-plugin");
             async.waterfall(
                 [
                     function (next) {
@@ -533,7 +533,7 @@ describe("A server", function () {
         });
         
         it("can override user-supplied configuration options", function (done) {
-            server.loadPlugin("../test/data/test-plugin");
+            server.loadPlugin("./data/test-plugin");
             async.waterfall(
                 [
                     function (next) {
@@ -550,8 +550,8 @@ describe("A server", function () {
         });
         
         it("can be chained with other plugins", function (done) {
-            server.loadPlugin("../test/data/test-plugin");
-            server.loadPlugin("../test/data/increment-port-plugin");
+            server.loadPlugin("./data/test-plugin");
+            server.loadPlugin("./data/increment-port-plugin");
             async.waterfall(
                 [
                     function (next) {
@@ -569,8 +569,8 @@ describe("A server", function () {
         
         it("can be loaded simultaneously with other plugins", function (done) {
             server.loadPlugin(
-                "../test/data/test-plugin",
-                "../test/data/increment-port-plugin"
+                "./data/test-plugin",
+                "./data/increment-port-plugin"
             );
             async.waterfall(
                 [
