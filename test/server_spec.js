@@ -384,6 +384,83 @@ describe("A server", function () {
         }).to.throw("scheme must be 'http' or 'https'");
     });
     
+    it("can publish a different scheme that what it is using", function (done) {
+        async.waterfall(
+            [
+                function (next) {
+                    testServer = server(
+                        {
+                            scheme: {
+                                private : "http",
+                                public  : "https"
+                            }
+                        },
+                        testHandler
+                    );
+                    testServer.start(next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.match(/https:\/\/localhost:\d{1,5}\//);
+                    url = url.replace("https://", "http://");
+                    get(url, next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    testServer = server(
+                        {
+                            cert   : testCertificate,
+                            key    : testKey,
+                            scheme : {
+                                private : "https",
+                                public  : "http"
+                            }
+                        },
+                        testHandler
+                    );
+                    testServer.start(next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.match(/http:\/\/localhost:\d{1,5}\//);
+                    url = url.replace("http://", "https://");
+                    get(url, next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    expect(function () {
+                        server(
+                            {
+                                scheme : {
+                                    private : "ftp",
+                                    public  : "http"
+                                }
+                            }
+                        );
+                    }).to.throw("scheme must be 'http' or 'https'");
+                    expect(function () {
+                        server(
+                            {
+                                scheme : {
+                                    private : "http",
+                                    public  : "ftp"
+                                }
+                            }
+                        );
+                    }).to.throw("scheme must be 'http' or 'https'");
+                    return next();
+                }
+            ],
+            done
+        );
+    });
+    
     it("cannot compute its base URL if it is not listening", function (done) {
         testServer = server();
         
@@ -711,6 +788,26 @@ describe("A server", function () {
                     },
                     function (next) {
                         expect(testServer.url()).to.equal("https://foo:12346/");
+                        return next();
+                    }
+                ],
+                done
+            );
+        });
+        
+        it("cannot modify the caller options", function (done) {
+            var options = { port: 54321 };
+            server.loadPlugin("./data/test-plugin");
+            testServer = server(options);
+            
+            async.waterfall(
+                [
+                    function (next) {
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal(serverUrl);
+                        expect(options).to.deep.equal({ port: 54321 });
                         return next();
                     }
                 ],

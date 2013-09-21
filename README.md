@@ -44,7 +44,13 @@ requests automatically. The following configuration options are available:
     assigned. For cases involving a proxy, a port pair can be specified (see
     `server.start()` for more details).
  + **scheme** - _Defaults to 'http'_. Must be either 'http' or 'https'. When
-    running with 'https', a certifacate and key must also be specified.
+    running with 'https', a certifacate and key must also be specified. If
+    running behind a proxy it is possible to specify a scheme pair as follows:
+        scheme: {
+            private : "http",
+            public  : "https"
+        }
+    The public scheme will be reflected by `server.url()`.
 
 ### doppio.loadPlugin([id...])
 
@@ -125,7 +131,6 @@ options returned from the previous plugin as its argument. For example, the
 default option logic is equivalent to the following plugin code:
 
     module.exports = function (options) {
-        options           = options || {};
         options.autostart = "autostart" in options ? options.autostart : true;
         options.hostname  = options.hostname || "localhost";
         options.path      = options.path || "/";
