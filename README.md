@@ -125,6 +125,7 @@ default option logic is equivalent to the following plugin code:
     module.exports = function (options) {
         options           = options || {};
         options.autostart = "autostart" in options ? options.autostart : true;
+        options.hostname  = options.hostname || "localhost";
         options.port      = "port" in options ? options.port : 0;
         options.scheme    = options.scheme || "http";
         return options;
