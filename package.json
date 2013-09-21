@@ -1,6 +1,6 @@
 {
   "name": "doppio",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A small server container to make managing and testing server processes easier.",
   "homepage": "https://github.com/jagoda/doppio",
   "author": {
