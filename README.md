@@ -46,11 +46,8 @@ requests automatically. The following configuration options are available:
  + **scheme** - _Defaults to 'http'_. Must be either 'http' or 'https'. When
     running with 'https', a certifacate and key must also be specified. If
     running behind a proxy it is possible to specify a scheme pair as follows:
-        scheme: {
-            private : "http",
-            public  : "https"
-        }
-    The public scheme will be reflected by `server.url()`.
+    `{ private: "http", public: "https" }`. The public scheme will be reflected
+    by `server.url()`.
 
 ### doppio.loadPlugin([id...])
 
@@ -76,10 +73,8 @@ integrating with external tools like [Socket.IO][4].
     is not provided, the default port is used (this is typically an arbitrary
     open port). In the case that the server should bind to a different port
     than the client will connect on, a pair can be specified as follows:
-        {
-            private : <port to bind to>,
-            public  : <port to publish via `server.url()`>
-        }
+    `{ private: 54321, public: 80 }`. The public port will be reflected by
+    `server.url()`.
  + **callback** _Optional_. If provided, the callback will be automatically
     subscribed to the `ready` and `error` events.
 
