@@ -62,7 +62,7 @@ Unloads all plugins restoring Doppio to the default behavior.
     is not provided, the default port is used (this is typically an arbitrary
     open port).
  + **callback** _Optional_. If provided, the callback will be automatically
-    subscribed to the `ready` and `error` events.
+    subscribed to the `listening` and `error` events.
 
 Starts listening on a port. It is an error to try to start a server that is
 already listening. Returns a chainable reference to the server.
@@ -88,7 +88,7 @@ Returns the fully qualified URL of the application. An error will be thrown if
 
 Emitted when an error occurs with the server.
 
-### Event: 'ready'
+### Event: 'listening'
 
     function () { }
 

@@ -151,7 +151,7 @@ describe("A server", function () {
             [
                 // Bind to arbitrary port in the background.
                 function (next) {
-                    testServer.start().once("ready", next);
+                    testServer.start().once("listening", next);
                 },
                 function (next) {
                     get(testServer.url(), next);
@@ -161,7 +161,7 @@ describe("A server", function () {
                 },
                 // Bind to specific port in the background.
                 function (next) {
-                    testServer.start(12345).once("ready", next);
+                    testServer.start(12345).once("listening", next);
                 },
                 function (next) {
                     var url = testServer.url();
@@ -348,7 +348,7 @@ describe("A server", function () {
                     expect(error).to.be.ok;
                     process.env.NODE_ENV = "production";
                     testServer           = server({ port: 12345 }, testHandler);
-                    testServer.once("ready", next);
+                    testServer.once("listening", next);
                 },
                 function (next) {
                     get(url, next);
@@ -463,7 +463,7 @@ describe("A server", function () {
         async.waterfall(
             [
                 function (next) {
-                    server1.start(port).on("ready", next);
+                    server1.start(port).on("listening", next);
                 },
                 function (next) {
                     // Error occurs because two servers try to bind to the same
