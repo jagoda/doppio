@@ -485,6 +485,56 @@ describe("A server", function () {
         );
     });
     
+    describe("exposes a Node HTTP API that", function () {
+        
+        it("is a proper Node Server API instance", function () {
+            testServer = server();
+            expect(testServer.server()).to.be.an.instanceOf(http.Server);
+        });
+        
+        it("cannot change the underlying server behavior", function (done) {
+            testServer = server();
+            testServer.server().listen = function () {
+                throw new Error("bomb");
+            };
+            testServer.start(done);
+        });
+        
+        it("is compatible with Socket.IO", function (done) {
+            testServer = server();
+            
+            async.waterfall(
+                [
+                    function (next) {
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        var ioClient, ioServer;
+                        
+                        ioServer = require("socket.io")
+                            .listen(testServer.server(), { "log level": 0 });
+                        ioClient = require("socket.io-client")
+                            .connect(testServer.url());
+                        
+                        ioClient.on("connect", function () {
+                            ioClient.on("ping", function () {
+                                ioClient.emit("pong");
+                                ioClient.disconnect();
+                            });
+                        });
+                        
+                        ioServer.sockets.on("connection", function (socket) {
+                            socket.emit("ping");
+                            socket.on("pong", next);
+                        });
+                    }
+                ],
+                done
+            );
+        });
+        
+    });
+    
     describe("plugin", function () {
         
         var serverUrl = "https://foo:12345/";

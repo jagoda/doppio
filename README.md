@@ -56,6 +56,11 @@ section for more details.
 
 Unloads all plugins restoring Doppio to the default behavior.
 
+### server.server()
+
+Returns a Node HTTP API instance for the Doppio instance. This is useful for
+integrating with external tools like [Socket.IO][4].
+
 ### server.start([port], [callback])
 
  + **port** - _Optional_. The port that the server should listen on. If this
@@ -122,3 +127,4 @@ default option logic is equivalent to the following plugin code:
 [1]: http://nodejs.org/api/http.html#http_http_createserver_requestlistener "Node.JS HTTP Server"
 [2]: http://expressjs.com/api.html#app.listen "Express app.listen()"
 [3]: http://nodejs.org/api/https.html "Node.JS HTTPS Server"
+[4]: http://socket.io/ "Socket.IO"

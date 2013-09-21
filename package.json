@@ -29,6 +29,8 @@
     "jshint": "~2.1.10",
     "mocha": "~1.12.1",
     "grunt-cli": "~0.1.9",
-    "istanbul": "~0.1.43"
+    "istanbul": "~0.1.43",
+    "socket.io-client": "~0.9.16",
+    "socket.io": "~0.9.16"
   }
 }
