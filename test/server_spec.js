@@ -587,6 +587,26 @@ describe("A server", function () {
             );
         });
         
+        it("cannot modify the caller options", function (done) {
+            var options = { port: 54321 };
+            server.loadPlugin("./data/test-plugin");
+            testServer = server(options);
+            
+            async.waterfall(
+                [
+                    function (next) {
+                        testServer.start(next);
+                    },
+                    function (next) {
+                        expect(testServer.url()).to.equal(serverUrl);
+                        expect(options).to.deep.equal({ port: 54321 });
+                        return next();
+                    }
+                ],
+                done
+            );
+        });
+        
     });
     
 });
