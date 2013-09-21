@@ -44,7 +44,13 @@ requests automatically. The following configuration options are available:
     assigned. For cases involving a proxy, a port pair can be specified (see
     `server.start()` for more details).
  + **scheme** - _Defaults to 'http'_. Must be either 'http' or 'https'. When
-    running with 'https', a certifacate and key must also be specified.
+    running with 'https', a certifacate and key must also be specified. If
+    running behind a proxy it is possible to specify a scheme pair as follows:
+        scheme: {
+            private : "http",
+            public  : "https"
+        }
+    The public scheme will be reflected by `server.url()`.
 
 ### doppio.loadPlugin([id...])
 
