@@ -37,6 +37,8 @@ requests automatically. The following configuration options are available:
     [Node HTTPS documentation][3] for more information.
  + **hostname** - _Defaults to 'localhost'_. Sets the hostname that the server
     will be running at. This is used by `server.url()`.
+ + **path** - _Defaults to '/'_. Sets the base path for all URLs computed using
+    `server.url()`.
  + **port** - _Defaults to 0_. The default port to use if a port is not provided
     to `server.start()`. If 0 is provided, an arbitrary open port will be
     assigned. For cases involving a proxy, a port pair can be specified (see
@@ -126,6 +128,7 @@ default option logic is equivalent to the following plugin code:
         options           = options || {};
         options.autostart = "autostart" in options ? options.autostart : true;
         options.hostname  = options.hostname || "localhost";
+        options.path      = options.path || "/";
         options.port      = "port" in options ? options.port : 0;
         options.scheme    = options.scheme || "http";
         return options;

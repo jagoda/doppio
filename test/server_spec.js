@@ -318,6 +318,34 @@ describe("A server", function () {
         );
     });
     
+    it("can publish a base URL path for accessing the server", function (done) {
+        testServer = server({ path: "/foo/bar" });
+        
+        async.waterfall(
+            [
+                function (next) {
+                    testServer.start(next);
+                },
+                function (next) {
+                    var pathPattern =
+                        /http:\/\/localhost:\d{1,5}\/foo\/bar\/path/;
+                    
+                    expect(testServer.url()).to.match(
+                        /http:\/\/localhost:\d{1,5}\/foo\/bar/
+                    );
+                    expect(testServer.url("/path")).to.match(pathPattern);
+                    expect(testServer.url("path")).to.match(pathPattern);
+                    expect(testServer.url("../path")).to.match(pathPattern);
+                    expect(testServer.url("some/../../path")).to.match(
+                        pathPattern
+                    );
+                    next();
+                }
+            ],
+            done
+        );
+    });
+    
     it("can use the 'https' scheme", function (done) {
         testServer = server(
             {
