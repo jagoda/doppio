@@ -384,6 +384,83 @@ describe("A server", function () {
         }).to.throw("scheme must be 'http' or 'https'");
     });
     
+    it("can publish a different scheme that what it is using", function (done) {
+        async.waterfall(
+            [
+                function (next) {
+                    testServer = server(
+                        {
+                            scheme: {
+                                private : "http",
+                                public  : "https"
+                            }
+                        },
+                        testHandler
+                    );
+                    testServer.start(next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.match(/https:\/\/localhost:\d{1,5}\//);
+                    url = url.replace("https://", "http://");
+                    get(url, next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    testServer = server(
+                        {
+                            cert   : testCertificate,
+                            key    : testKey,
+                            scheme : {
+                                private : "https",
+                                public  : "http"
+                            }
+                        },
+                        testHandler
+                    );
+                    testServer.start(next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.match(/http:\/\/localhost:\d{1,5}\//);
+                    url = url.replace("http://", "https://");
+                    get(url, next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    expect(function () {
+                        server(
+                            {
+                                scheme : {
+                                    private : "ftp",
+                                    public  : "http"
+                                }
+                            }
+                        );
+                    }).to.throw("scheme must be 'http' or 'https'");
+                    expect(function () {
+                        server(
+                            {
+                                scheme : {
+                                    private : "http",
+                                    public  : "ftp"
+                                }
+                            }
+                        );
+                    }).to.throw("scheme must be 'http' or 'https'");
+                    return next();
+                }
+            ],
+            done
+        );
+    });
+    
     it("cannot compute its base URL if it is not listening", function (done) {
         testServer = server();
         
