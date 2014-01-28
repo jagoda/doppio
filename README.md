@@ -1,6 +1,8 @@
 doppio
 ======
 
+[![Build Status](https://travis-ci.org/jagoda/doppio.png?branch=master)](https://travis-ci.org/jagoda/doppio)
+
 Doppio is a small "server container" for Node.JS web applications that makes
 managing the server process more convenient and testable.
 

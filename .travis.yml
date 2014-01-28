@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+- '0.10'
+deploy:
+  provider: npm
+  email: jeffrey.jagoda@gmail.com
+  api_key:
+    secure: ky9xGaT2+5rHcNH6ycO/RK0MiJZeikhYvxdmsaHBFD3rLXAxp6iJneqEY3T97FXp0AoW0cztvr5m7040CbJYibZmc/8iL3CjL6+SBIECR++UfP3BNnuyCwMey5pZN+mqcbeVLX/hYQX2ibmRjMvJbWmH87V+DQGPUAa4qobEesQ=
+  on:
+    tags: true
+    repo: jagoda/doppio
