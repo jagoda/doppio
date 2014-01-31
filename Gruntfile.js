@@ -36,7 +36,7 @@ module.exports = function (grunt) {
             
             src : [ "*.js", "lib/**/*.js" ],
             
-            testOverrides : {
+            test : {
                 options : {
                     expr : true,
                     

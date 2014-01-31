@@ -403,6 +403,34 @@ describe("A server", function () {
         );
     });
     
+    it("can use a String object to specify the scheme", function (done) {
+        /* jshint -W053 */
+        testServer = server(
+            {
+                cert   : testCertificate,
+                key    : testKey,
+                scheme : new String("https")
+            },
+            testHandler
+        );
+        
+        async.waterfall(
+            [
+                function (next) {
+                    testServer.start(next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.match(/^https:\/\//);
+                    get(url, next);
+                }
+            ],
+            done
+        );
+        /* jshint +W053 */
+    });
+    
     it("must use either the 'http' or 'https' scheme", function () {
         expect(server({ scheme: "http" })).to.be.ok;
         expect(server({
