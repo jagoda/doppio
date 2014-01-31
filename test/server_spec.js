@@ -245,6 +245,37 @@ describe("A server", function () {
         );
     });
     
+    it("accepts a string value for a port number", function (done) {
+        testServer = server({ port: "12345" }, testHandler);
+        
+        async.waterfall(
+            [
+                function (next) {
+                    testServer.start(next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.equal("http://localhost:12345/");
+                    get(url, next);
+                },
+                function (next) {
+                    testServer.stop(next);
+                },
+                function (next) {
+                    testServer.start("54321", next);
+                },
+                function (next) {
+                    var url = testServer.url();
+                    
+                    expect(url).to.equal("http://localhost:54321/");
+                    get(url, next);
+                }
+            ],
+            done
+        );
+    });
+    
     it("can publish a different port that what it listens on", function (done) {
         testServer = server(
             {
@@ -384,7 +415,7 @@ describe("A server", function () {
         }).to.throw("scheme must be 'http' or 'https'");
     });
     
-    it("can publish a different scheme that what it is using", function (done) {
+    it("can publish a different scheme than what it is using", function (done) {
         async.waterfall(
             [
                 function (next) {
