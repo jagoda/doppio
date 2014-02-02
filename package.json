@@ -1,6 +1,6 @@
 {
   "name": "doppio",
-  "version": "0.3.3",
+  "version": "1.0.0",
   "description": "A small server container to make managing and testing server processes easier.",
   "homepage": "https://github.com/jagoda/doppio",
   "author": {
@@ -22,15 +22,10 @@
     "test": "grunt"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "async": "~0.2.9",
-    "grunt-contrib-jshint": "~0.6.4",
-    "chai": "~1.7.2",
-    "jshint": "~2.1.10",
-    "mocha": "~1.12.1",
-    "grunt-cli": "~0.1.9",
-    "istanbul": "~0.1.43",
-    "socket.io-client": "~0.9.16",
-    "socket.io": "~0.9.16"
+    "istanbul": "~0.2.4",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-jscs-checker": "~0.3.2",
+    "mocha": "~1.17.1"
   }
 }
