@@ -1,6 +1,55 @@
+var expect = require("chai").expect;
+var Server = require("../lib/server");
+
 describe("A server", function () {
 
-	it("can be started and stopped");
+	describe("using the default configuration", function () {
+
+		var server;
+
+		function expectSuccess (callback) {
+			return function (error) {
+				expect(error, "error argument").not.to.exist;
+				callback();
+			};
+		}
+
+		beforeEach(function () {
+			server = new Server();
+		});
+
+		afterEach(function (done) {
+			server
+				.stop()
+				.fail(function () { /* Ignore errors. */ })
+				.nodeify(done);
+		});
+
+		it("can be started", function (done) {
+			server.start().nodeify(done);
+		});
+
+		it("can be stopped", function (done) {
+			var stop = server.stop.bind(server);
+
+			server.start().then(stop).nodeify(done);
+		});
+
+		it("can callback when the server starts", function (done) {
+			server.start(expectSuccess(done));
+		});
+
+		it("can callback when the server stops", function (done) {
+			var stop = server.stop.bind(server, expectSuccess(done));
+
+			server.start().then(stop);
+		});
+
+		it("emits the 'ready' event once it has started");
+
+		it("emits the 'stopped' event after it has stopped");
+
+	});
 
 	it("cannot be started if already listening");
 

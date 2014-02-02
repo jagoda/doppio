@@ -22,10 +22,14 @@
     "test": "grunt"
   },
   "devDependencies": {
+    "chai": "~1.9.0",
     "istanbul": "~0.2.4",
     "grunt-cli": "~0.1.13",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-jscs-checker": "~0.3.2",
     "mocha": "~1.17.1"
+  },
+  "dependencies": {
+    "q": "~1.0.0"
   }
 }
