@@ -1,5 +1,5 @@
 var expect = require("chai").expect;
-var Server = require("../lib/server");
+var Server = require("../lib/Server");
 
 describe("A server", function () {
 
@@ -45,9 +45,17 @@ describe("A server", function () {
 			server.start().then(stop);
 		});
 
-		it("emits the 'ready' event once it has started");
+		it("emits the 'ready' event once it has started", function (done) {
+			server.once("ready", done);
+			server.start();
+		});
 
-		it("emits the 'stopped' event after it has stopped");
+		it("emits the 'stopped' event after it has stopped", function (done) {
+			var stop = server.stop.bind(server);
+
+			server.once("stopped", done);
+			server.start().then(stop);
+		});
 
 	});
 
