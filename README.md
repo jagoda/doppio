@@ -24,7 +24,7 @@ Creates a new server instance.
 #### server.start([callback])
 
  + **callback** - _Optional_. If provided, the `callback` will be invoked with
-   an error if the server could not be started or `null` if no error occurred.
+   `(null, port)` or `(error)` if the server failed to start.
 
 Causes the server to bind to a port and begin listening for requests. Returns a
 promise that is fulfilled when the server is ready to accept requests.
@@ -32,14 +32,14 @@ promise that is fulfilled when the server is ready to accept requests.
 #### server.stop([callback])
 
  + **callback** - _Optional_. If provided, the `callback` will be invoked with
-   an error if the server could not be stopped or `null` if no error occurred.
+   `(null)` or `(error)` if there was an error stopping the server.
 
 Causes the server to stop listening for new requests. Returns a promise that is
 fulfilled once the server has stopped accepting requsts.
 
 #### Event 'ready'
 
-	function () { }
+	function (port) { }
 
 Emitted once the server is ready to accept requests.
 
@@ -51,7 +51,7 @@ Emitted once the server has stopped and completed all remaining requests.
 
 #### Event 'error'
 
-	function () { }
+	function (error) { }
 
 Emitted if an error occurs while attempting to start or stop the server.
 

@@ -1,18 +1,25 @@
 var expect = require("chai").expect;
 var Server = require("../lib/Server");
 
+// Mocha seems to have a bug that causes unhandled exceptions in an event
+// handler to not be handled as test errors.
+function eventHandlerTest (test, done) {
+	return function () {
+		try {
+			test.apply(null, arguments);
+			done();
+		}
+		catch (error) {
+			done(error);
+		}
+	};
+}
+
 describe("A server", function () {
 
 	describe("using the default configuration", function () {
 
 		var server;
-
-		function expectSuccess (callback) {
-			return function (error) {
-				expect(error, "error argument").not.to.exist;
-				callback();
-			};
-		}
 
 		beforeEach(function () {
 			server = new Server();
@@ -26,7 +33,14 @@ describe("A server", function () {
 		});
 
 		it("can be started", function (done) {
-			server.start().nodeify(done);
+			server
+			.start()
+			.then(function (port) {
+				expect(port, "listening port")
+					.to.be.a("number")
+					.and.to.be.greaterThan(0);
+			})
+			.nodeify(done);
 		});
 
 		it("can be stopped", function (done) {
@@ -36,24 +50,44 @@ describe("A server", function () {
 		});
 
 		it("can callback when the server starts", function (done) {
-			server.start(expectSuccess(done));
+			function callback (error, port) {
+				expect(error, "error argument").not.to.exist;
+				expect(port, "port argument")
+					.to.be.a("number")
+					.and.to.be.greaterThan(0);
+				done();
+			}
+
+			server.start(callback);
 		});
 
 		it("can callback when the server stops", function (done) {
-			var stop = server.stop.bind(server, expectSuccess(done));
+			function callback (error) {
+				expect(error).not.to.exist;
+				done();
+			}
+
+			var stop = server.stop.bind(server, callback);
 
 			server.start().then(stop);
 		});
 
 		it("emits the 'ready' event once it has started", function (done) {
-			server.once("ready", done);
+			server.on("ready", eventHandlerTest(
+				function (port) {
+					expect(port, "server port")
+						.to.be.a("number")
+						.to.be.greaterThan(0);
+				},
+				done
+			));
 			server.start();
 		});
 
 		it("emits the 'stopped' event after it has stopped", function (done) {
 			var stop = server.stop.bind(server);
 
-			server.once("stopped", done);
+			server.on("stopped", done);
 			server.start().then(stop);
 		});
 
@@ -62,12 +96,6 @@ describe("A server", function () {
 	it("cannot be started if already listening");
 
 	it("cannot be stopped if not listening");
-
-	it("can start and stop in the background");
-
-	it("can return the bound port");
-
-	it("fails to return the port if it is not listening");
 
 	it("binds to an arbitrary port by default");
 
