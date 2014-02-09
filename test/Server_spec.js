@@ -1,4 +1,5 @@
 var expect = require("chai").expect;
+var q      = require("q");
 var Server = require("../lib/Server");
 var sinon  = require("sinon");
 
@@ -21,6 +22,19 @@ describe("A server", function () {
 	describe("using the default configuration", function () {
 
 		var server;
+
+		function getAvailablePort () {
+			var availablePort = 0;
+
+			return server.start()
+			.then(function (port) {
+				availablePort = port;
+				return server.stop();
+			})
+			.then(function () {
+				return availablePort;
+			});
+		}
 
 		beforeEach(function () {
 			server = new Server();
@@ -200,9 +214,107 @@ describe("A server", function () {
 			.nodeify(done);
 		});
 
-	});
+		it("binds to an arbitrary port", function (done) {
+			var ports = [];
+			var promise = q();
+			var i;
 
-	it("binds to an arbitrary port by default");
+			function start () {
+				return server.start();
+			}
+
+			function stop (port) {
+				ports.push(port);
+				return server.stop();
+			}
+
+			// Run several iterations in order to minimize the probability that
+			// we get the same port value by coincidence.
+			for (i = 0; i < 10; i += 1) {
+				promise = promise.then(start).then(stop);
+			}
+
+			promise.then(function () {
+				var arbitrary = false;
+
+				ports.reduce(function (previous, current) {
+					if (previous !== current) {
+						arbitrary = true;
+					}
+					return current;
+				});
+
+				expect(arbitrary, "different ports").to.be.true;
+			})
+			.nodeify(done);
+		});
+
+		it("can be explicitly started on a specified port", function (done) {
+			var availablePort;
+
+			getAvailablePort().then(function (port) {
+				availablePort = port;
+				return server.start(availablePort);
+			})
+			.then(function (port) {
+				expect(port, "assigned port").to.equal(availablePort);
+			})
+			.nodeify(done);
+		});
+
+		it("can be explicitly started on a specified port with a callback", function (done) {
+			var availablePort;
+
+			function callback (error, port) {
+				expect(error, "error argument").not.to.exist;
+				expect(port, "assigned port").to.equal(availablePort);
+				done();
+			}
+
+			getAvailablePort().then(function (port) {
+				availablePort = port;
+				return server.start(availablePort, callback);
+			});
+		});
+
+		it("accepts a string value for an explicit port specification", function (done) {
+			var availablePort;
+
+			getAvailablePort().then(function (port) {
+				availablePort = port;
+				return server.start(String(availablePort));
+			})
+			.then(function (port) {
+				expect(port, "assigned port").to.equal(availablePort);
+			})
+			.nodeify(done);
+		});
+
+		it("cannot be started on an invalid port", function (done) {
+			var illegalPort = -1;
+
+			function expectFailure (errorCase) {
+				return function () {
+					throw new Error(errorCase + ": Start should not succeed with an invalid port number.");
+				};
+			}
+
+			function validateError (error) {
+				expect(error, "error type").to.be.an.instanceOf(Error);
+				expect(error.message, "error message").to.contain("not a valid port");
+			}
+
+			server.start(illegalPort)
+			.then(expectFailure("negative"), validateError)
+			.then(function () {
+				illegalPort = 65536;
+				return server.start(illegalPort);
+			})
+			.then(expectFailure("max"), validateError)
+			.nodeify(done);
+		});
+
+	});
 
 	it("can be configured with a default port");
 
@@ -210,19 +322,7 @@ describe("A server", function () {
 
 	it("cannot be configured with an invalid port");
 
-	it("can be explicitly started on a specified port");
-
-	it("understands a string value when explicitly starting on a port");
-
 	it("can be explicitly started on an arbitrary port");
-
-	it("cannot be started on an invalid port");
-
-	it("can render a base URL given a hostname");
-
-	it("fails to render a base URL if no hostname is specified");
-
-	it("can resolve a URL relative to the server base");
 
 	it("starts by default if not in a test environment");
 
