@@ -3,6 +3,10 @@ var q      = require("q");
 var Server = require("../lib/Server");
 var sinon  = require("sinon");
 
+var ANY_PORT = 0;
+var MAX_PORT = 65535;
+var MIN_PORT = 0;
+
 // Mocha seems to have a bug that causes unhandled exceptions in an event
 // handler to not be handled as test errors.
 function eventHandlerTest (test, done) {
@@ -19,22 +23,23 @@ function eventHandlerTest (test, done) {
 
 describe("A server", function () {
 
+	function getAvailablePort () {
+		var availablePort = ANY_PORT;
+		var server = new Server();
+
+		return server.start()
+		.then(function (port) {
+			availablePort = port;
+			return server.stop();
+		})
+		.then(function () {
+			return availablePort;
+		});
+	}
+
 	describe("using the default configuration", function () {
 
 		var server;
-
-		function getAvailablePort () {
-			var availablePort = 0;
-
-			return server.start()
-			.then(function (port) {
-				availablePort = port;
-				return server.stop();
-			})
-			.then(function () {
-				return availablePort;
-			});
-		}
 
 		beforeEach(function () {
 			server = new Server();
@@ -51,7 +56,7 @@ describe("A server", function () {
 			.then(function (port) {
 				expect(port, "listening port")
 					.to.be.a("number")
-					.and.to.be.greaterThan(0);
+					.and.to.be.greaterThan(MIN_PORT);
 			})
 			.nodeify(done);
 		});
@@ -102,7 +107,7 @@ describe("A server", function () {
 				expect(error, "error argument").not.to.exist;
 				expect(port, "port argument")
 					.to.be.a("number")
-					.and.to.be.greaterThan(0);
+					.and.to.be.greaterThan(MIN_PORT);
 				done();
 			}
 
@@ -148,7 +153,7 @@ describe("A server", function () {
 				function (port) {
 					expect(port, "server port")
 						.to.be.a("number")
-						.to.be.greaterThan(0);
+						.to.be.greaterThan(MIN_PORT);
 				},
 				done
 			));
@@ -215,7 +220,7 @@ describe("A server", function () {
 		});
 
 		it("binds to an arbitrary port", function (done) {
-			var ports = [];
+			var ports   = [];
 			var promise = q();
 			var i;
 
@@ -291,7 +296,7 @@ describe("A server", function () {
 		});
 
 		it("cannot be started on an invalid port", function (done) {
-			var illegalPort = -1;
+			var illegalPort = MIN_PORT - 1;
 
 			function expectFailure (errorCase) {
 				return function () {
@@ -307,7 +312,7 @@ describe("A server", function () {
 			server.start(illegalPort)
 			.then(expectFailure("negative"), validateError)
 			.then(function () {
-				illegalPort = 65536;
+				illegalPort = MAX_PORT + 1;
 				return server.start(illegalPort);
 			})
 			.then(expectFailure("max"), validateError)
@@ -316,13 +321,73 @@ describe("A server", function () {
 
 	});
 
-	it("can be configured with a default port");
+	it("can be configured with a default port", function (done) {
+		var availablePort;
+		var server;
 
-	it("understands a string value for the port configuration");
+		getAvailablePort().then(function (port) {
+			availablePort = port;
+			server        = new Server({ port : availablePort });
+			return server.start();
+		})
+		.then(function (port) {
+			expect(port, "assigned port").to.equal(availablePort);
+		})
+		.fin(function () {
+			server.stop();
+		})
+		.nodeify(done);
+	});
 
-	it("cannot be configured with an invalid port");
+	it("understands a string value for the port configuration", function (done) {
+		var availablePort;
+		var server;
 
-	it("can be explicitly started on an arbitrary port");
+		getAvailablePort().then(function (port) {
+			availablePort = port;
+			server        = new Server({ port : String(availablePort) });
+			return server.start();
+		})
+		.then(function (port) {
+			expect(port, "assigned port").to.equal(availablePort);
+		})
+		.fin(function () {
+			server.stop();
+		})
+		.nodeify(done);
+	});
+
+	it("cannot be configured with an invalid port", function () {
+		var server;
+
+		expect(function () {
+			server = new Server({ port : MIN_PORT - 1 });
+		}, "negative").to.throw(/not a valid port/);
+
+		expect(function () {
+			server = new Server({ port : MAX_PORT + 1 });
+		}, "max").to.throw(/not a valid port/);
+	});
+
+	it("can be explicitly started on an arbitrary port", function (done) {
+		var availablePort;
+		var server;
+
+		getAvailablePort().then(function (port) {
+			availablePort = port;
+			server        = new Server({ port : availablePort });
+			return server.start(ANY_PORT);
+		})
+		.then(function (port) {
+			expect(port, "assigned port")
+				.to.be.greaterThan(MIN_PORT)
+				.and.not.to.equal(availablePort);
+		})
+		.fin(function () {
+			server.stop();
+		})
+		.nodeify(done);
+	});
 
 	it("starts by default if not in a test environment");
 
