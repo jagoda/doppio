@@ -21,7 +21,8 @@ Version 1.0 is under active development. For previous (stable) versions, see the
    behavior.
 
 Available options are:
-
+ + **autostart** - Indicates that the server should start automatically if the
+   `NODE_ENV` environment variable is not set to "test". Defaults to `true`.
  + **port** - Specifies the port that the server should bind to if one is not
    specified during the call to `start`. A value of 0 will cause the server to
    bind to any available port. Defaults to 0.

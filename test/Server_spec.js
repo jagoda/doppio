@@ -3,25 +3,33 @@ var q      = require("q");
 var Server = require("../lib/Server");
 var sinon  = require("sinon");
 
-var ANY_PORT = 0;
-var MAX_PORT = 65535;
-var MIN_PORT = 0;
-
-// Mocha seems to have a bug that causes unhandled exceptions in an event
-// handler to not be handled as test errors.
-function eventHandlerTest (test, done) {
-	return function () {
-		try {
-			test.apply(null, arguments);
-			done();
-		}
-		catch (error) {
-			done(error);
-		}
-	};
-}
-
 describe("A server", function () {
+
+	var ANY_PORT = 0;
+	var MAX_PORT = 65535;
+	var MIN_PORT = 0;
+
+	function ensureStopped (server) {
+		return function (done) {
+			server().stop()
+			.fail(function () { /* Ignore errors. */ })
+			.nodeify(done);
+		};
+	}
+
+	// Mocha seems to have a bug that causes unhandled exceptions in an event
+	// handler to not be handled as test errors.
+	function eventHandlerTest (test, done) {
+		return function () {
+			try {
+				test.apply(null, arguments);
+				done();
+			}
+			catch (error) {
+				done(error);
+			}
+		};
+	}
 
 	function getAvailablePort () {
 		var availablePort = ANY_PORT;
@@ -37,6 +45,21 @@ describe("A server", function () {
 		});
 	}
 
+	function validateErrorMessage (message) {
+		return function (error) {
+			expect(error, "error argument")
+				.to.be.an.instanceOf(Error)
+				.and.to.have.a.property("message", message);
+		};
+	}
+
+	function validatePort (port, tag) {
+		tag = tag || "assigned port";
+		expect(port, tag)
+			.to.be.a("number")
+			.and.to.be.greaterThan(MIN_PORT);
+	}
+
 	describe("using the default configuration", function () {
 
 		var server;
@@ -45,19 +68,11 @@ describe("A server", function () {
 			server = new Server();
 		});
 
-		afterEach(function (done) {
-			server.stop()
-			.fail(function () { /* Ignore errors. */ })
-			.nodeify(done);
-		});
+		afterEach(ensureStopped(function () { return server; }));
 
 		it("can be started", function (done) {
 			server.start()
-			.then(function (port) {
-				expect(port, "listening port")
-					.to.be.a("number")
-					.and.to.be.greaterThan(MIN_PORT);
-			})
+			.then(validatePort)
 			.nodeify(done);
 		});
 
@@ -70,11 +85,7 @@ describe("A server", function () {
 				function () {
 					throw new Error("Start should not succeed if already listeing.");
 				},
-				function (error) {
-					expect(error, "start error")
-						.to.be.an.instanceOf(Error)
-						.and.to.have.property("message", "Server is already listening.");
-				}
+				validateErrorMessage("Server is already listening.")
 			)
 			.nodeify(done);
 		});
@@ -93,11 +104,7 @@ describe("A server", function () {
 				function () {
 					throw new Error("Stop should not succeed if not listening.");
 				},
-				function (error) {
-					expect(error, "stop error")
-						.to.be.an.instanceOf(Error)
-						.and.to.have.property("message", "Server is not listening.");
-				}
+				validateErrorMessage("Server is not listening.")
 			)
 			.nodeify(done);
 		});
@@ -105,9 +112,7 @@ describe("A server", function () {
 		it("can callback when the server starts", function (done) {
 			function callback (error, port) {
 				expect(error, "error argument").not.to.exist;
-				expect(port, "port argument")
-					.to.be.a("number")
-					.and.to.be.greaterThan(MIN_PORT);
+				validatePort(port, "port argument");
 				done();
 			}
 
@@ -149,14 +154,7 @@ describe("A server", function () {
 		});
 
 		it("emits the 'ready' event once it has started", function (done) {
-			server.on("ready", eventHandlerTest(
-				function (port) {
-					expect(port, "server port")
-						.to.be.a("number")
-						.to.be.greaterThan(MIN_PORT);
-				},
-				done
-			));
+			server.on("ready", eventHandlerTest(validatePort, done));
 			server.start().done();
 		});
 
@@ -389,9 +387,43 @@ describe("A server", function () {
 		.nodeify(done);
 	});
 
-	it("starts by default if not in a test environment");
+	describe("in a non-test environment", function () {
 
-	it("can be configured to not start automatically");
+		var NODE_ENV;
+		var server;
+
+		before(function () {
+			NODE_ENV = process.env.NODE_ENV;
+			delete process.env.NODE_ENV;
+		});
+
+		after(function () {
+			process.env.NODE_ENV = NODE_ENV;
+		});
+
+		afterEach(ensureStopped(function () { return server; }));
+
+		it("starts by default", function (done) {
+			server = new Server();
+
+			server.on("error", done);
+			server.on("ready", eventHandlerTest(validatePort, done));
+		});
+
+		it("can be configured to not start automatically", function (done) {
+			server = new Server({ autostart : false });
+
+			// Give the server a chance to autostart first. Afterwards when
+			// `start()` is explicitly called, it should fail if the server
+			// autostarted.
+			q.ninvoke(process, "nextTick")
+			.then(function () {
+				return server.start();
+			})
+			.nodeify(done);
+		});
+
+	});
 
 	it("can be configured for HTTPS communication");
 
