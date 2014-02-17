@@ -425,7 +425,17 @@ describe("A server", function () {
 
 	});
 
+	describe("with a handler", function () {
+
+		it("responds to requests when started");
+
+		it("does not respond when stopped");
+
+	});
+
 	it("can be configured for HTTPS communication");
+
+	it("cannot be created with a bad HTTPS configuration");
 
 	describe("facade", function () {
 
