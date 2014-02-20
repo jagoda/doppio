@@ -31,13 +31,18 @@ Creates a new server instance.
 
 ### Server Instances
 
+#### server.port
+
+The port that the server is listening on. If the server has not been started,
+this value will be `null`.
+
 #### server.start([port], [callback])
 
  + **port** - _Optional_. Specifies the port that the server should bind to.
    A value of 0 will cause the server to bind to any available port. Defaults to
    0 or the value provided in the server config.
  + **callback** - _Optional_. If provided, the `callback` will be invoked with
-   `(null, port)` or `(error)` if the server failed to start.
+   `(null)` or `(error)` if the server failed to start.
 
 Causes the server to bind to a port and begin listening for requests. Returns a
 promise that is fulfilled when the server is ready to accept requests.
@@ -52,7 +57,7 @@ fulfilled once the server has stopped accepting requsts.
 
 #### Event 'ready'
 
-	function (port) { }
+	function () { }
 
 Emitted once the server is ready to accept requests.
 

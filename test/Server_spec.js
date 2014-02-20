@@ -7,7 +7,7 @@ describe("A server", function () {
 
 	var ANY_PORT = 0;
 	var MAX_PORT = 65535;
-	var MIN_PORT = 0;
+	var MIN_PORT = 1;
 
 	function ensureStopped (server) {
 		return function (done) {
@@ -36,8 +36,8 @@ describe("A server", function () {
 		var server = new Server();
 
 		return server.start()
-		.then(function (port) {
-			availablePort = port;
+		.then(function () {
+			availablePort = server.port;
 			return server.stop();
 		})
 		.then(function () {
@@ -48,16 +48,24 @@ describe("A server", function () {
 	function validateErrorMessage (message) {
 		return function (error) {
 			expect(error, "error argument")
-				.to.be.an.instanceOf(Error)
-				.and.to.have.a.property("message", message);
+			.to.be.an.instanceOf(Error)
+			.and.to.have.a.property("message", message);
 		};
 	}
 
-	function validatePort (port, tag) {
+	function validListeningPort (tag) {
 		tag = tag || "assigned port";
-		expect(port, tag)
-			.to.be.a("number")
-			.and.to.be.greaterThan(MIN_PORT);
+
+		expect(this.port, tag)
+		.to.be.a("number")
+		.and.to.be.at.least(MIN_PORT)
+		.and.to.be.at.most(MAX_PORT);
+	}
+
+	function validStoppedPort (tag) {
+		tag = tag || "stopped port";
+
+		expect(this.port, tag).to.be.null;
 	}
 
 	describe("using the default configuration", function () {
@@ -70,20 +78,32 @@ describe("A server", function () {
 
 		afterEach(ensureStopped(function () { return server; }));
 
+		it("has a read-only `port` property", function (done) {
+			expect(server, "initial port").to.have.property("port", null);
+
+			// Port value should be read-only.
+			server.port = 42;
+			expect(server.port, "read only port").to.be.null;
+
+			server.start()
+			.then(validListeningPort.bind(server))
+			.then(server.stop.bind(server))
+			.then(validStoppedPort.bind(server, "final port"))
+			.nodeify(done);
+		});
+
 		it("can be started", function (done) {
 			server.start()
-			.then(validatePort)
+			.then(validListeningPort.bind(server))
 			.nodeify(done);
 		});
 
 		it("fails to start if already listening", function (done) {
 			server.start()
-			.then(function () {
-				return server.start();
-			})
+			.then(server.start.bind(server))
 			.then(
 				function () {
-					throw new Error("Start should not succeed if already listeing.");
+					throw new Error("Start should not succeed if already listening.");
 				},
 				validateErrorMessage("Server is already listening.")
 			)
@@ -92,9 +112,8 @@ describe("A server", function () {
 
 		it("can be stopped", function (done) {
 			server.start()
-			.then(function () {
-				return server.stop();
-			})
+			.then(server.stop.bind(server))
+			.then(validStoppedPort.bind(server))
 			.nodeify(done);
 		});
 
@@ -110,9 +129,9 @@ describe("A server", function () {
 		});
 
 		it("can callback when the server starts", function (done) {
-			function callback (error, port) {
+			function callback (error) {
 				expect(error, "error argument").not.to.exist;
-				validatePort(port, "port argument");
+				validListeningPort.call(server, "port argument");
 				done();
 			}
 
@@ -125,10 +144,7 @@ describe("A server", function () {
 				done();
 			}
 
-			server.start()
-			.then(function () {
-				return server.start(callback);
-			});
+			server.start().then(server.start.bind(server, callback));
 		});
 
 		it("can callback when the server stops", function (done) {
@@ -138,9 +154,7 @@ describe("A server", function () {
 			}
 
 			server.start()
-			.then(function () {
-				return server.stop(callback);
-			})
+			.then(server.stop.bind(server, callback))
 			.done();
 		});
 
@@ -154,7 +168,7 @@ describe("A server", function () {
 		});
 
 		it("emits the 'ready' event once it has started", function (done) {
-			server.on("ready", eventHandlerTest(validatePort, done));
+			server.on("ready", eventHandlerTest(validListeningPort.bind(server), done));
 			server.start().done();
 		});
 
@@ -185,9 +199,7 @@ describe("A server", function () {
 			server.on("stopped", done);
 
 			server.start()
-			.then(function () {
-				return server.stop();
-			})
+			.then(server.stop.bind(server))
 			.done();
 		});
 
@@ -197,9 +209,7 @@ describe("A server", function () {
 			server.on("error", errorHandler);
 
 			server.start()
-			.then(function () {
-				return server.stop();
-			})
+			.then(server.stop.bind(server))
 			.then(function () {
 				expect(errorHandler.called, "initially called").to.be.false;
 				return server.stop();
@@ -222,19 +232,15 @@ describe("A server", function () {
 			var promise = q();
 			var i;
 
-			function start () {
-				return server.start();
-			}
-
-			function stop (port) {
-				ports.push(port);
+			function stop () {
+				ports.push(server.port);
 				return server.stop();
 			}
 
 			// Run several iterations in order to minimize the probability that
 			// we get the same port value by coincidence.
 			for (i = 0; i < 10; i += 1) {
-				promise = promise.then(start).then(stop);
+				promise = promise.then(server.start.bind(server)).then(stop);
 			}
 
 			promise.then(function () {
@@ -259,8 +265,8 @@ describe("A server", function () {
 				availablePort = port;
 				return server.start(availablePort);
 			})
-			.then(function (port) {
-				expect(port, "assigned port").to.equal(availablePort);
+			.then(function () {
+				expect(server.port, "assigned port").to.equal(availablePort);
 			})
 			.nodeify(done);
 		});
@@ -268,9 +274,9 @@ describe("A server", function () {
 		it("can be explicitly started on a specified port with a callback", function (done) {
 			var availablePort;
 
-			function callback (error, port) {
+			function callback (error) {
 				expect(error, "error argument").not.to.exist;
-				expect(port, "assigned port").to.equal(availablePort);
+				expect(server.port, "assigned port").to.equal(availablePort);
 				done();
 			}
 
@@ -287,14 +293,14 @@ describe("A server", function () {
 				availablePort = port;
 				return server.start(String(availablePort));
 			})
-			.then(function (port) {
-				expect(port, "assigned port").to.equal(availablePort);
+			.then(function () {
+				expect(server.port, "assigned port").to.equal(availablePort);
 			})
 			.nodeify(done);
 		});
 
 		it("cannot be started on an invalid port", function (done) {
-			var illegalPort = MIN_PORT - 1;
+			var illegalPort = MIN_PORT - 2;
 
 			function expectFailure (errorCase) {
 				return function () {
@@ -328,11 +334,11 @@ describe("A server", function () {
 			server        = new Server({ port : availablePort });
 			return server.start();
 		})
-		.then(function (port) {
-			expect(port, "assigned port").to.equal(availablePort);
+		.then(function () {
+			expect(server.port, "assigned port").to.equal(availablePort);
 		})
 		.fin(function () {
-			server.stop();
+			return server.stop();
 		})
 		.nodeify(done);
 	});
@@ -346,11 +352,11 @@ describe("A server", function () {
 			server        = new Server({ port : String(availablePort) });
 			return server.start();
 		})
-		.then(function (port) {
-			expect(port, "assigned port").to.equal(availablePort);
+		.then(function () {
+			expect(server.port, "assigned port").to.equal(availablePort);
 		})
 		.fin(function () {
-			server.stop();
+			return server.stop();
 		})
 		.nodeify(done);
 	});
@@ -359,7 +365,7 @@ describe("A server", function () {
 		var server;
 
 		expect(function () {
-			server = new Server({ port : MIN_PORT - 1 });
+			server = new Server({ port : MIN_PORT - 2 });
 		}, "negative").to.throw(/not a valid port/);
 
 		expect(function () {
@@ -376,13 +382,13 @@ describe("A server", function () {
 			server        = new Server({ port : availablePort });
 			return server.start(ANY_PORT);
 		})
-		.then(function (port) {
-			expect(port, "assigned port")
-				.to.be.greaterThan(MIN_PORT)
-				.and.not.to.equal(availablePort);
+		.then(function () {
+			expect(server.port, "assigned port")
+			.to.be.greaterThan(MIN_PORT)
+			.and.not.to.equal(availablePort);
 		})
 		.fin(function () {
-			server.stop();
+			return server.stop();
 		})
 		.nodeify(done);
 	});
@@ -407,7 +413,7 @@ describe("A server", function () {
 			server = new Server();
 
 			server.on("error", done);
-			server.on("ready", eventHandlerTest(validatePort, done));
+			server.on("ready", eventHandlerTest(validListeningPort.bind(server), done));
 		});
 
 		it("can be configured to not start automatically", function (done) {
@@ -417,9 +423,7 @@ describe("A server", function () {
 			// `start()` is explicitly called, it should fail if the server
 			// autostarted.
 			q.ninvoke(process, "nextTick")
-			.then(function () {
-				return server.start();
-			})
+			.then(server.start.bind(server))
 			.nodeify(done);
 		});
 
