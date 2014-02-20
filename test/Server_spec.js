@@ -2,6 +2,7 @@ var expect = require("chai").expect;
 var q      = require("q");
 var Server = require("../lib/Server");
 var sinon  = require("sinon");
+//var url    = require("url");
 
 describe("A server", function () {
 
@@ -91,6 +92,8 @@ describe("A server", function () {
 			.then(validStoppedPort.bind(server, "final port"))
 			.nodeify(done);
 		});
+
+		it("has a read-only `protocol` property");
 
 		it("can be started", function (done) {
 			server.start()
@@ -323,6 +326,8 @@ describe("A server", function () {
 			.nodeify(done);
 		});
 
+		it("emits the `request` event when a request is received");
+
 	});
 
 	it("can be configured with a default port", function (done) {
@@ -431,13 +436,47 @@ describe("A server", function () {
 
 	describe("with a handler", function () {
 
+		var server;
+
+		function requestHandler (request, response) {
+			response.writeHead(200);
+			response.end("hello", "utf8");
+		}
+
+//		function serverUrl (server) {
+//			return url.format({
+//				protocol : "http",
+//				hostname : "localhost",
+//				port     : server.port,
+//				path     : "/"
+//			});
+//		}
+
+		before(function () {
+			server = new Server(requestHandler);
+		});
+
 		it("responds to requests when started");
 
 		it("does not respond when stopped");
 
+		it("does not emit the `request` event when a request is received");
+
 	});
 
-	it("can be configured for HTTPS communication");
+	describe("with a handler and options", function () {
+
+		it("responds to requests");
+
+	});
+
+	describe("configured with a certificate and key", function () {
+
+		it("uses the 'https' protocol");
+
+		it("encrypts responses");
+
+	});
 
 	it("cannot be created with a bad HTTPS configuration");
 
