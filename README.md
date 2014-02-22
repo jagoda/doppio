@@ -15,10 +15,12 @@ Version 1.0 is under active development. For previous (stable) versions, see the
 
 ## API Reference
 
-### doppio([options])
+### doppio([options], [handler])
 
  + **options** - _Optional_. Configuration options that modify the server
    behavior.
+ + **handler** - _Optional_. A function accepting `(request, response)` for
+   arguments that is used to handle requests.
 
 Available options are:
  + **autostart** - Indicates that the server should start automatically if the

@@ -28,7 +28,8 @@
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-jscs-checker": "~0.3.2",
     "mocha": "~1.17.1",
-    "sinon": "~1.8.1"
+    "sinon": "~1.8.1",
+    "request": "^2.34.0"
   },
   "dependencies": {
     "q": "~1.0.0"

@@ -1,14 +1,20 @@
-var expect = require("chai").expect;
-var q      = require("q");
-var Server = require("../lib/Server");
-var sinon  = require("sinon");
-//var url    = require("url");
+var expect       = require("chai").expect;
+var q            = require("q");
+var request      = require("request");
+var Server       = require("../lib/Server");
+var ServerHelper = require("../lib/ServerHelper");
+var sinon        = require("sinon");
 
 describe("A server", function () {
 
 	var ANY_PORT = 0;
 	var MAX_PORT = 65535;
 	var MIN_PORT = 1;
+
+	function checkResponse (response, body) {
+		expect(response.statusCode, "status code").to.equal(200);
+		expect(body, "body").to.equal("hello");
+	}
 
 	function ensureStopped (server) {
 		return function (done) {
@@ -44,6 +50,11 @@ describe("A server", function () {
 		.then(function () {
 			return availablePort;
 		});
+	}
+
+	function requestHandler (request, response) {
+		response.writeHead(200);
+		response.end("hello", "utf8");
 	}
 
 	function validateErrorMessage (message) {
@@ -436,29 +447,46 @@ describe("A server", function () {
 
 	describe("with a handler", function () {
 
+		var helper;
 		var server;
-
-		function requestHandler (request, response) {
-			response.writeHead(200);
-			response.end("hello", "utf8");
-		}
-
-//		function serverUrl (server) {
-//			return url.format({
-//				protocol : "http",
-//				hostname : "localhost",
-//				port     : server.port,
-//				path     : "/"
-//			});
-//		}
 
 		before(function () {
 			server = new Server(requestHandler);
+			helper = new ServerHelper(server);
 		});
 
-		it("responds to requests when started");
+		it("responds to requests when started", function (done) {
+			server.start()
+			.then(function () {
+				return q.nfcall(request, helper.url());
+			})
+			.spread(checkResponse)
+			.fin(server.stop.bind(server))
+			.nodeify(done);
+		});
 
-		it("does not respond when stopped");
+		it("does not respond when stopped", function (done) {
+			var url;
+
+			server.start()
+			.then(function () {
+				url = helper.url();
+				return server.stop();
+			})
+			.then(function () {
+				return q.nfcall(request, url);
+			})
+			.then(
+				function () {
+					throw new Error("Server should not respond when stopped.");
+				},
+				function (error) {
+					expect(error, "argument type").to.be.an.instanceof(Error);
+					expect(error.message, "error message").to.match(/connect/);
+				}
+			)
+			.nodeify(done);
+		});
 
 		it("does not emit the `request` event when a request is received");
 
@@ -466,7 +494,25 @@ describe("A server", function () {
 
 	describe("with a handler and options", function () {
 
-		it("responds to requests");
+		var helper;
+		var server;
+
+		before(function (done) {
+			server = new Server({ autostart : false }, requestHandler);
+			helper = new ServerHelper(server);
+
+			server.start().nodeify(done);
+		});
+
+		after(function (done) {
+			server.stop().nodeify(done);
+		});
+
+		it("responds to requests", function (done) {
+			q.nfcall(request, helper.url())
+			.spread(checkResponse)
+			.nodeify(done);
+		});
 
 	});
 

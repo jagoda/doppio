@@ -55,6 +55,7 @@ describe("A server helper", function () {
 			it("generates a server URL", function () {
 				expect(helper.url(), "server url").to.match(/^http:\/\/localhost:\d{1,5}\/?$/);
 			});
+
 		});
 
 		describe("with the server stopped", function () {
