@@ -1,4 +1,5 @@
 var expect       = require("chai").expect;
+var http         = require("http");
 var q            = require("q");
 var request      = require("request");
 var Server       = require("../lib/Server");
@@ -337,7 +338,19 @@ describe("A server", function () {
 			.nodeify(done);
 		});
 
-		it("emits the `request` event when a request is received");
+		it("emits the `request` event when a request is received", function (done) {
+			server.on("request", function (request, response) {
+				expect(request).to.be.an.instanceOf(http.IncomingMessage);
+				expect(response).to.be.an.instanceOf(http.ServerResponse);
+				response.end("OK");
+			});
+
+			server.start()
+			.then(function () {
+				return q.nfcall(request, new ServerHelper(server).url());
+			})
+			.nodeify(done);
+		});
 
 	});
 
@@ -488,7 +501,21 @@ describe("A server", function () {
 			.nodeify(done);
 		});
 
-		it("does not emit the `request` event when a request is received");
+		it("does not emit the `request` event when a request is received", function (done) {
+			var spy = sinon.spy();
+
+			server.on("request", spy);
+
+			server.start()
+			.then(function () {
+				return q.nfcall(request, helper.url());
+			})
+			.then(function () {
+				expect(spy.called).to.be.false;
+			})
+			.fin(server.stop.bind(server))
+			.nodeify(done);
+		});
 
 	});
 

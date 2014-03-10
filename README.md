@@ -20,7 +20,8 @@ Version 1.0 is under active development. For previous (stable) versions, see the
  + **options** - _Optional_. Configuration options that modify the server
    behavior.
  + **handler** - _Optional_. A function accepting `(request, response)` for
-   arguments that is used to handle requests.
+   arguments that is used to handle requests. This is typcially something like
+   an [express][express] instance.
 
 Available options are:
  + **autostart** - Indicates that the server should start automatically if the
@@ -63,6 +64,18 @@ fulfilled once the server has stopped accepting requsts.
 
 Emitted once the server is ready to accept requests.
 
+#### Event 'request'
+
+	function (request, response) { }
+
+ + **request** - An [http.IncomingMessage][request] object representing the
+   request.
+ + **response** - An [http.ServerResponse][response] object respresenting the
+   response.
+
+If the server was not configured with a request handler then the `request` event
+will be emitted whenever the server receives a request.
+
 #### Event 'stopped'
 
 	function () { }
@@ -76,3 +89,5 @@ Emitted once the server has stopped and completed all remaining requests.
 Emitted if an error occurs while attempting to start or stop the server.
 
 [express]: http://expressjs.com/ "Express"
+[request]: http://nodejs.org/api/http.html#http_http_incomingmessage "HTTP Request"
+[response]: http://nodejs.org/api/http.html#http_class_http_serverresponse "HTTP Response"
