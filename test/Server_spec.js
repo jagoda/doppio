@@ -96,7 +96,7 @@ describe("A server", function () {
 
 			// Port value should be read-only.
 			server.port = 42;
-			expect(server.port, "read only port").to.be.null;
+			expect(server.port, "read-only port").to.be.null;
 
 			server.start()
 			.then(validListeningPort.bind(server))
@@ -105,7 +105,23 @@ describe("A server", function () {
 			.nodeify(done);
 		});
 
-		it("has a read-only `protocol` property");
+		it("has a read-only `protocol` property", function (done) {
+			expect(server, "initial protocol").to.have.property("protocol", null);
+
+			// Protocol value should be read-only.
+			server.protocol = "http";
+			expect(server.protocol, "read-only protocol").to.be.null;
+
+			server.start()
+			.then(function () {
+				expect(server.protocol, "assigned protocol").to.equal("http");
+			})
+			.then(server.stop.bind(server))
+			.then(function () {
+				expect(server.protocol, "final port").to.be.null;
+			})
+			.nodeify(done);
+		});
 
 		it("can be started", function (done) {
 			server.start()

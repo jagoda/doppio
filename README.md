@@ -39,6 +39,11 @@ Creates a new server instance.
 The port that the server is listening on. If the server has not been started,
 this value will be `null`.
 
+#### server.protocol
+
+The protocol that the server is using (either `http` or `https`). If the server
+has not been started, this value will be `null`.
+
 #### server.start([port], [callback])
 
  + **port** - _Optional_. Specifies the port that the server should bind to.
