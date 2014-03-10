@@ -86,6 +86,8 @@ Emitted once the server has stopped and completed all remaining requests.
 
 	function (error) { }
 
+ + **error** - The `Error` object representing the error that occurred.
+
 Emitted if an error occurs while attempting to start or stop the server.
 
 [express]: http://expressjs.com/ "Express"
