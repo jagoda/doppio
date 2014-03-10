@@ -17,15 +17,17 @@ Version 1.0 is under active development. For previous (stable) versions, see the
 
 ### doppio([options], [handler])
 
- + **options** - _Optional_. Configuration options that modify the server
-   behavior.
  + **handler** - _Optional_. A function accepting `(request, response)` for
    arguments that is used to handle requests. This is typcially something like
    an [express][express] instance.
+ + **options** - _Optional_. Configuration options that modify the server
+   behavior.
 
 Available options are:
  + **autostart** - Indicates that the server should start automatically if the
    `NODE_ENV` environment variable is not set to "test". Defaults to `true`.
+ + **certificate** - A public certificate to use for HTTPS.
+ + **key** - A private key to use for HTTPS.
  + **port** - Specifies the port that the server should bind to if one is not
    specified during the call to `start`. A value of 0 will cause the server to
    bind to any available port. Defaults to 0.

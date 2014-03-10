@@ -29,7 +29,8 @@
     "grunt-jscs-checker": "~0.3.2",
     "mocha": "~1.17.1",
     "sinon": "~1.8.1",
-    "request": "^2.34.0"
+    "request": "^2.34.0",
+    "q-io": "^1.11.0"
   },
   "dependencies": {
     "q": "~1.0.0"

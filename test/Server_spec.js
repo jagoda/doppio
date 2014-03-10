@@ -1,5 +1,7 @@
 var expect       = require("chai").expect;
+var fs           = require("q-io/fs");
 var http         = require("http");
+var path         = require("path");
 var q            = require("q");
 var request      = require("request");
 var Server       = require("../lib/Server");
@@ -11,6 +13,9 @@ describe("A server", function () {
 	var ANY_PORT = 0;
 	var MAX_PORT = 65535;
 	var MIN_PORT = 1;
+
+	var CERTIFICATE = path.join(__dirname, "test.crt");
+	var KEY         = path.join(__dirname, "test.key");
 
 	function checkResponse (response, body) {
 		expect(response.statusCode, "status code").to.equal(200);
@@ -561,13 +566,59 @@ describe("A server", function () {
 
 	describe("configured with a certificate and key", function () {
 
-		it("uses the 'https' protocol");
+		var helper;
+		var server;
 
-		it("encrypts responses");
+		before(function (done) {
+			q.all([ fs.read(CERTIFICATE), fs.read(KEY) ])
+			.spread(function (certificate, key) {
+				var options = {
+					certificate : certificate,
+					key         : key
+				};
+
+				server = new Server(options, requestHandler);
+				helper = new ServerHelper(server);
+				return server.start();
+			})
+			.nodeify(done);
+		});
+
+		after(function (done) {
+			server.stop().nodeify(done);
+		});
+
+		it("uses the 'https' protocol", function () {
+			expect(server.protocol, "server protocol").to.equal("https");
+		});
+
+		it("encrypts responses", function (done) {
+			q.nfcall(request, { strictSSL : false, url : helper.url() })
+			.spread(checkResponse)
+			.nodeify(done);
+		});
 
 	});
 
-	it("cannot be created with a bad HTTPS configuration");
+	it("cannot be created with a bad HTTPS configuration", function (done) {
+		var message = "Missing certificate or key.";
+
+		q.all([ fs.read(CERTIFICATE), fs.read(KEY) ])
+		.spread(function (certificate, key) {
+			expect(function () {
+				/* jshint -W031 */
+				new Server({ certificate : certificate });
+				/* jshint +W031 */
+			}).to.throw(message);
+
+			expect(function () {
+				/* jshint -W031 */
+				new Server({ key : key });
+				/* jshint +W031 */
+			}).to.throw(message);
+		})
+		.nodeify(done);
+	});
 
 	describe("facade", function () {
 
